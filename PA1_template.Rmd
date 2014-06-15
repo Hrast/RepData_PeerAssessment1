@@ -21,14 +21,14 @@ Mean total number of steps taken per day is **`r mean1data` steps** and median i
 ## Histogram of data for given time without missing values
 
 ```{r fig.height=4, fig.width=11}
-barplot(hist1data$steps,names.arg=hist1data$date, cex.names=0.6)
+barplot(hist1data$steps,names.arg=hist1data$date, cex.names=0.6, main="Histogram of steps per day (NA removed) ")
 ```
 ## What is the average daily activity pattern?
 ```{r fig.height=4, fig.width=11}
 time1data<-aggregate( steps ~ interval , data = data1 , mean )
 maxsteps<-max(time1data$steps)
 maxindex<-time1data[which.max(time1data$steps),1]
-plot(time1data, type="l")
+plot(time1data, type="l", main="Daily activity pattern (NA removed)")
 ```
 Maximum average number of steps is **`r maxsteps` steps** and it is in interval **"`r maxindex`" interval**.
 
@@ -54,4 +54,59 @@ for (x in newdata$steps){
 ```
 There is all together **`r missingdata`** missing values
 
+```{r}
+hist2data<-aggregate( steps ~ date , data = newdata , sum )
+mean2data<-mean(hist2data$steps)
+median2data<-median(hist2data$steps)
+```
+```{r fig.height=4, fig.width=11}
+barplot(hist2data$steps,names.arg=hist2data$date, cex.names=0.6, main="Histogram of steps per day (NA replaced with average) ")
+```
+Mean total number of steps taken per day with filled NA according to given formula is **`r mean2data` steps** and median is **`r median2data` steps**.
+
+Difference is **`r mean2data-mean1data` steps** in favour of "replaced NA data" and difference in median is **`r median2data-median1data` steps** in favour of "replaced NA data".
+
 ## Are there differences in activity patterns between weekdays and weekends?
+
+### Preprocessing the data
+```{r}
+timevector<-newdata$date
+timevector<- strptime(timevector, "%Y-%m-%d", tz = "")
+newtimevector<-c()
+for (i in 1:length(timevector)){
+        if(isWeekday(timevector[i], wday = 1:5)){
+                newtimevector[i]<-"weekday"
+                }
+        else {
+                newtimevector[i]<-"weekend"
+                }
+        }
+newtimevector<-as.factor(newtimevector)
+newdata<-cbind(newdata, newtimevector)
+
+```
+### Extracting the data
+```{r fig.height=4, fig.width=11}
+weekdays <- subset(newdata, newtimevector=="weekday", select=c(steps, interval))
+plotweekdays<-aggregate( steps ~ interval , data = weekdays , mean )
+
+weekend <- subset(newdata, newtimevector=="weekend", select=c(steps, interval))
+plotweekend<-aggregate( steps ~ interval , data = weekend , mean )
+
+plotdifference<-plotweekend
+plotdifference$steps<-plotdifference$steps-plotweekdays$steps
+
+sumweekdays<-sum(plotweekdays$steps)
+sumweekends<-sum(plotweekend$steps)
+
+```
+### Panel plot
+```{r fig.height=11, fig.width=11}
+par(mfrow=c(3,1), mar=c(1,4,3,1))
+plot(plotweekdays, type="l", main="Weekdays",ylim=c(0, 250))
+plot(plotweekend, type="l", main="Weekends", ylim=c(0, 250))
+plot(plotdifference, type="l", main="Difference weekends-weekdays", ylim=c(-125, 125))
+```
+Average number of steps in one day durong weekdays is **`r sumweekdays` steps** and on weekend is **`r sumweekends` steps**.
+
+From this we can conclude that **activity is higher during weekend** and comparing the graphs, **activity resulting in diffenerce is mainly occuring during afternoon hours**. **During weekdays the peak of activity is 8 in the morning**, and generaly **during weekdays is higher activity in early morning.**
