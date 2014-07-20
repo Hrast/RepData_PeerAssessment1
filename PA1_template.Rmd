@@ -21,7 +21,7 @@ Mean total number of steps taken per day is **`r mean1data` steps** and median i
 ## Histogram of data for given time without missing values
 
 ```{r fig.height=4, fig.width=11}
-barplot(hist1data$steps,names.arg=hist1data$date, cex.names=0.6, main="Histogram of steps per day (NA removed) ")
+hist(hist1data$steps,main = paste("Histogram of" , "steps"))
 ```
 ## What is the average daily activity pattern?
 ```{r fig.height=4, fig.width=11}
@@ -60,7 +60,7 @@ mean2data<-mean(hist2data$steps)
 median2data<-median(hist2data$steps)
 ```
 ```{r fig.height=4, fig.width=11}
-barplot(hist2data$steps,names.arg=hist2data$date, cex.names=0.6, main="Histogram of steps per day (NA replaced with average) ")
+hist(hist1data$steps,main = paste("Histogram of" , "steps"))
 ```
 Mean total number of steps taken per day with filled NA according to given formula is **`r mean2data` steps** and median is **`r median2data` steps**.
 
